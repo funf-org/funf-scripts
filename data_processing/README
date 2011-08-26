@@ -1,0 +1,9 @@
+Funf Data Processing
+----------------------
+
+This project contains convenience scripts for processing Funf data files.  
+Make sure to download and install the dependencies before running the scripts.
+
+
+Dependencies:
+PyCrypto (https://www.dlitz.net/software/pycrypto/)
