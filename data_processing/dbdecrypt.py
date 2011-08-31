@@ -34,7 +34,9 @@ def decrypt_if_not_db_file(file_name, extension=None):
             shutil.move(file_name + "." + extension, file_name)
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] [sqlite_file1.db [sqlite_file2.db...]]")
+    usage = "%prog [options] [sqlite_file1.db [sqlite_file2.db...]]"
+    description = "Safely decrypt Sqlite3 db files.  Checks to see if the file can be opened by Sqlite.  If so, the file is left alone, otherwise the file is decrypted.  Uses the decrypt script, so it always keeps a backup of the original encrypted files. "
+    parser = OptionParser(usage="%s\n\n%s" % (usage, description))
     parser.add_option("-i", "--inplace", dest="extension", default=None,
                       help="The extension to rename the original file to.  Will not overwrite file if it already exists. Defaults to '%s'." % decrypt.default_extension,)
     (options, args) = parser.parse_args()

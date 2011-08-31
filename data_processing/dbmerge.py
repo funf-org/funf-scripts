@@ -59,9 +59,11 @@ def merge(db_files=None, out_file=None):
 
 
 if __name__ == '__main__':
-    parser = OptionParser(usage="usage: %prog [options] [sqlite_file1.db [sqlite_file2.db...]]")
+    usage = "%prog [options] [sqlite_file1.db [sqlite_file2.db...]]"
+    description = "Merges many database files into one file."
+    parser = OptionParser(usage="%s\n\n%s" % (usage, description))
     parser.add_option("-o", "--output", dest="file", default=None,
-                      help="Filename to merge all files into.  Created if it doesn't exist.", metavar="FILE")
+                      help="Filename to merge all files into.  Will not overwrite a file if it already exists.", metavar="FILE")
     (options, args) = parser.parse_args()
     try:
         merge(args, options.file)

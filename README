@@ -1,0 +1,36 @@
+=Funf Data Processing=
+
+This project contains convenience scripts for processing Funf data files.  
+These files are designed to be used as standalone scripts, and not as a library to be imported.
+Make sure to download and install the dependencies before running the scripts.
+
+
+==Data Processing==
+Scripts for processing data once it has been retrieved from devices.
+
+Dependencies:
+	* PyCrypto ( https://www.dlitz.net/software/pycrypto/ )
+
+
+===decrypt.py===
+Decrypts files using the DES key specified, or the one included in this script.  Keeps a backup copy of the original file.  
+*WARNING:* This script does not detect if a file has already been decrypted. Decrypting a file that is not encrypted will scramble the file.
+
+===dbdecrypt.py===
+Safe script for decrypting sqlite3 db files.  Checks to see if the file can be opened by Sqlite.  Only if it cannot open the file, it decrypts it.
+
+===dbmerge.py===
+Merge many database files into one file.
+
+
+
+==Simple Server==
+A basic reference HTTP server for communicating with Funf applications.  
+The server hosts one configuration file (/config), and accepts multipart form uploads of files (/data).
+
+This is meant to be a reference implementation for prototyping, and not meant to be a stable long running implementation.
+
+
+
+
+
