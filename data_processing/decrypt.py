@@ -10,9 +10,43 @@ import string
 _des_key = string.join([chr(byte) for byte in (12,34,45,54,27,122,33,45)], '')
 default_extension = "orig"
 
+_iterations = 135
+_salt = '\xa6\xab\x09\x93\xf4\xcc\xee\x10'
+
+def key_from_password(password, salt=_salt, iterations=_iterations):
+    '''Imitate java's PBEWithMD5AndDES algorithm to produce a DES key'''
+    from Crypto.Hash import MD5
+    hasher = MD5.new()
+    hasher.update(password)
+    hasher.update(salt)
+    result = hasher.digest()
+    for i in range(1, iterations):
+        hasher = MD5.new()
+        hasher.update(result)
+        result = hasher.digest()
+        #test = ' '.join([str( unsigned ) for unsigned in [ord(character) for character in result]])
+        #print test
+
+    key = result[:8]
+
+    # TODO: Not likely, but may need to adjust for twos complement in java
+
+    #For DES keys, LSB is odd parity for the key
+    def set_parity(v):
+        def num1s_notlsb(x):
+            return sum( [x&(1<<i)>0 for i in range(1, 8)] )
+        def even_parity(x):
+            return num1s_notlsb(x)%2 == 0
+        return v|0b1 if even_parity(v) else v&0b11111110
+    return ''.join([chr(set_parity(ord(digit))) for digit in key]) 
+    
+def prompt_for_password():
+    from getpass import getpass
+    return getpass("Enter encryption password: ")
+
 def decrypt(file_names, extension=None, key=None):
     extension = extension or default_extension
-    key = key or _des_key
+    key = key or key_from_password(prompt_for_password())
     decryptor = DES.new(key)
     for file_name in file_names:
         with open(file_name) as file:
