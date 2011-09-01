@@ -7,7 +7,7 @@ import os.path
 from Crypto.Cipher import DES
 import string
 
-_des_key = string.join([chr(byte) for byte in (12,34,45,54,27,122,33,45)], '')
+default_password = 'changeme'
 default_extension = "orig"
 
 _iterations = 135
@@ -44,16 +44,21 @@ def prompt_for_password():
     from getpass import getpass
     return getpass("Enter encryption password: ")
 
-def decrypt(file_names, extension=None, key=None):
+def backup_file(file_name, extension=None):
     extension = extension or default_extension
-    key = key or key_from_password(prompt_for_password())
+    return file_name + '.' + extension
+
+def decrypt(file_names, key, extension=None):
+    
+    assert key != None
     decryptor = DES.new(key)
     for file_name in file_names:
         with open(file_name) as file:
             encrypted_data = file.read()
             data = decryptor.decrypt(encrypted_data)
-        if not os.path.exists(file_name + '.' + extension):
-            shutil.copy2(file_name, file_name + '.' + extension)
+        backup_file_name = backup_file(file_name, extension)
+        if not os.path.exists(backup_file_name):
+            shutil.copy2(file_name, backup_file_name)
         with open(file_name, 'w') as file:
             file.write(data)
         
@@ -67,5 +72,7 @@ if __name__ == '__main__':
                       help="The extension to rename the original file to.  Will not overwrite file if it already exists. Defaults to '%s'." % default_extension,)
     parser.add_option("-k", "--key", dest="key", default=None,
                       help="The DES key used to decrypt the files.  Uses the default hard coded one if one is not supplied.",)
+
     (options, args) = parser.parse_args()
-    decrypt(args, options.extension)
+    key = options.key if options.key else key_from_password(prompt_for_password())
+    decrypt(args, key, options.extension)
