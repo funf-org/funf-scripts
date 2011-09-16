@@ -66,7 +66,7 @@ def merge(db_files=None, out_file=None):
         else:
             try:
                 for row in cursor:
-                    id, device, uuid, created = row
+                    id, name, device, uuid, created = row
             except IndexError:
                 print "No file info exists in: " + db_file
                 continue
