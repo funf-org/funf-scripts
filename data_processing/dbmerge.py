@@ -34,7 +34,7 @@ data_table = 'data'
 def merge(db_files=None, out_file=None):
     # Check that db_files are specified and exist
     if not db_files:
-        db_files = [file for file in os.listdir(os.curdir) if file.endswith(".db")]
+        db_files = [file for file in os.listdir(os.curdir) if file.endswith(".db") and not file.startswith("merged")]
         if not db_files: 
             raise Exception("Must specify at least one db file")
     nonexistent_files = [file for file in db_files if not os.path.exists(file)]
