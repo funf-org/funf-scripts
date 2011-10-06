@@ -44,16 +44,19 @@ def is_funf_database(file_name):
 def decrypt_if_not_db_file(file_name, key, extension=None):
     if is_funf_database(file_name):
         print "Already decrypted: '%s'" % file_name
+        return True
     else:
         print ("Attempting to decrypt: '%s'..." % file_name),
         decrypt.decrypt([file_name], key, extension)
         if is_funf_database(file_name):
             print "Success!"
+            return True
         else:
             print "FAILED!!!!"
             print "File is either encrypted with another method, another key, or is not a valid sqlite3 db file."
             print "Keeping original file."
             shutil.move(decrypt.backup_file(file_name, extension), file_name)
+            return False
 
 if __name__ == '__main__':
     usage = "%prog [options] [sqlite_file1.db [sqlite_file2.db...]]"

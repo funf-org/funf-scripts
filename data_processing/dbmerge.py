@@ -31,7 +31,7 @@ import time
 file_info_table = 'file_info'
 data_table = 'data'
 
-def merge(db_files=None, out_file=None):
+def merge(db_files=None, out_file=None, overwrite=False):
     # Check that db_files are specified and exist
     if not db_files:
         db_files = [file for file in os.listdir(os.curdir) if file.endswith(".db") and not file.startswith("merged")]
@@ -46,7 +46,10 @@ def merge(db_files=None, out_file=None):
         out_file = 'merged_%d.db' % int(time.time())
     
     if os.path.exists(out_file):
-        raise Exception("The file '%s' already exists." % out_file)
+        if overwrite:
+            os.remove(out_file)
+        else:
+            raise Exception("The file '%s' already exists." % out_file)
     
     out_conn = sqlite3.connect(out_file)
     out_conn.row_factory = sqlite3.Row
@@ -60,7 +63,7 @@ def merge(db_files=None, out_file=None):
         cursor = conn.cursor()
         try: 
             cursor.execute("select * from %s" % file_info_table)
-        except sqlite3.OperationalError:
+        except (sqlite3.OperationalError,sqlite3.DatabaseError):
             print "Unable to parse file: " + db_file
             continue
         else:
