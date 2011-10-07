@@ -50,6 +50,7 @@ def key_from_password(password, salt=_salt, iterations=_iterations):
         #print test
 
     key = result[:8]
+    
 
     # TODO: Not likely, but may need to adjust for twos complement in java
 
@@ -75,13 +76,13 @@ def decrypt(file_names, key, extension=None):
     assert key != None
     decryptor = DES.new(key)
     for file_name in file_names:
-        with open(file_name) as file:
+        with open(file_name, 'rb') as file:
             encrypted_data = file.read()
             data = decryptor.decrypt(encrypted_data)
         backup_file_name = backup_file(file_name, extension)
         if not os.path.exists(backup_file_name):
             shutil.copy2(file_name, backup_file_name)
-        with open(file_name, 'w') as file:
+        with open(file_name, 'wb') as file:
             file.write(data)
         
         
