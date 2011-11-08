@@ -19,6 +19,9 @@ Decrypts files using the DES key specified, or the one included in this script. 
 ===dbdecrypt.py===
 Safe script for decrypting sqlite3 db files.  Checks to see if the file can be opened by Sqlite.  Only if it cannot open the file, it decrypts it.
 
+===dbsalvage.py===
+Attempts to salvage as much data as possible from a corrupted file, by dumping its contents to a new db file.
+
 ===dbmerge.py===
 Merge many database files into one file.
 

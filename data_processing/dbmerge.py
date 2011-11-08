@@ -27,11 +27,12 @@ import sqlite3
 from optparse import OptionParser
 import os.path
 import time
+from dbsalvage import salvage
 
 file_info_table = 'file_info'
 data_table = 'data'
 
-def merge(db_files=None, out_file=None, overwrite=False):
+def merge(db_files=None, out_file=None, overwrite=False, attempt_salvage=True):
     # Check that db_files are specified and exist
     if not db_files:
         db_files = [file for file in os.listdir(os.curdir) if file.endswith(".db") and not file.startswith("merged")]
@@ -58,6 +59,8 @@ def merge(db_files=None, out_file=None, overwrite=False):
     out_cursor.execute('create table data (id text, device text, probe text, timestamp long, value text)')
     
     for db_file in db_files:
+        if attempt_salvage:
+            salvage(db_file)
         conn = sqlite3.connect(db_file)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
