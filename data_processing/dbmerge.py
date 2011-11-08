@@ -60,7 +60,12 @@ def merge(db_files=None, out_file=None, overwrite=False, attempt_salvage=True):
     
     for db_file in db_files:
         if attempt_salvage:
-            salvage(db_file)
+            try: 
+                salvage(db_file)
+            except (sqlite3.OperationalError,sqlite3.DatabaseError):
+                print "Unable to parse file: " + db_file
+                continue
+        
         conn = sqlite3.connect(db_file)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
