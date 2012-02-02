@@ -68,5 +68,10 @@ if __name__ == '__main__':
                       help="The DES key used to decrypt the files.  Uses the default hard coded one if one is not supplied.",)
     (options, args) = parser.parse_args()
     key = options.key if options.key else decrypt.key_from_password(decrypt.prompt_for_password())
-    for file_name in args:
-        decrypt_if_not_db_file(file_name, key, options.extension)
+    
+    try:
+        for file_name in args:
+            decrypt_if_not_db_file(file_name, key, options.extension)
+    except Exception as e:
+        import sys
+        sys.exit("ERROR: " + str(e))
