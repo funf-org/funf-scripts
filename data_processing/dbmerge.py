@@ -78,15 +78,19 @@ def merge(db_files=None, out_file=None, overwrite=False, attempt_salvage=True):
             try:
                 for row in cursor:
                     id, name, device, uuid, created = row
-            except IndexError:
+            except (sqlite3.OperationalError,sqlite3.DatabaseError,IndexError):
                 print "No file info exists in: " + db_file
                 continue
             print "Processing %s" % db_file
-            cursor.execute("select * from %s" % data_table)
-            for row in cursor:
-                id, probe, timestamp, value = row
-                new_row = (('%s-%d' % (uuid, id)), device, probe, timestamp, value)
-                out_conn.execute("insert into data values (?, ?, ?, ?, ?)", new_row)
+            try:
+                cursor.execute("select * from %s" % data_table)
+                for row in cursor:
+                    id, probe, timestamp, value = row
+                    new_row = (('%s-%d' % (uuid, id)), device, probe, timestamp, value)
+                    out_conn.execute("insert into data values (?, ?, ?, ?, ?)", new_row)
+            except (sqlite3.OperationalError,sqlite3.DatabaseError,IndexError):
+                print "Error processing the remainder of the file in: " + db_file
+                continue
             out_conn.commit()
     out_cursor.close()
 
