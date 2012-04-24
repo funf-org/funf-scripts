@@ -29,6 +29,7 @@ import os.path
 from Crypto.Cipher import DES
 import struct
 import string
+import tempfile
 
 default_password = 'changeme'
 default_extension = "orig"
@@ -83,18 +84,33 @@ def remove_padding(data):
         return data
     return data[:(data_size - num_padding_bytes)]
 
+def iter_has_next(iterable): 
+    it = iter(iterable) 
+    current = it.next()
+    for i in it: 
+        yield current, True
+        current = i
+    yield current, False
+
 def decrypt(file_names, key, extension=None):
     assert key != None
     decryptor = DES.new(key)
     for file_name in file_names:
+        
+        # Iteratively read 8 byte blocks, decrypt, and write to temp file
         with open(file_name, 'rb') as encrypted_file:
-            encrypted_data = encrypted_file.read()
-            data = remove_padding(decryptor.decrypt(encrypted_data))
+            with tempfile.NamedTemporaryFile(delete=False) as output_file:
+                for chunk, has_next in iter_has_next(iter((lambda:encrypted_file.read(_block_size)),'')):
+                    data = decryptor.decrypt(chunk)
+                    if not has_next:
+                        data = remove_padding(data)
+                    output_file.write(data)
+        
+        # When successful backup original file, and move temp file to original location
         backup_file_name = backup_file(file_name, extension)
         if not os.path.exists(backup_file_name):
-            shutil.copy2(file_name, backup_file_name)
-        with open(file_name, 'wb') as new_file:
-            new_file.write(data)
+            shutil.move(file_name, backup_file_name);
+        shutil.move(output_file.name, file_name);
         
         
 
