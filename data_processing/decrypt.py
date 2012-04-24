@@ -27,6 +27,7 @@ from optparse import OptionParser
 import shutil
 import os.path
 from Crypto.Cipher import DES
+import struct
 import string
 
 default_password = 'changeme'
@@ -34,6 +35,8 @@ default_extension = "orig"
 
 _iterations = 135
 _salt = '\xa6\xab\x09\x93\xf4\xcc\xee\x10'
+_key_size = 8
+_block_size = 8
 
 def key_from_password(password, salt=_salt, iterations=_iterations):
     '''Imitate java's PBEWithMD5AndDES algorithm to produce a DES key'''
@@ -71,19 +74,27 @@ def backup_file(file_name, extension=None):
     extension = extension or default_extension
     return file_name + '.' + extension
 
+def remove_padding(data):
+    data_size = len(data)
+    if data_size == 0:
+        return data
+    num_padding_bytes = struct.unpack('B', data[data_size - 1])[0]
+    if num_padding_bytes > 8:
+        return data
+    return data[:(data_size - num_padding_bytes)]
+
 def decrypt(file_names, key, extension=None):
-    
     assert key != None
     decryptor = DES.new(key)
     for file_name in file_names:
-        with open(file_name, 'rb') as file:
-            encrypted_data = file.read()
-            data = decryptor.decrypt(encrypted_data)
+        with open(file_name, 'rb') as encrypted_file:
+            encrypted_data = encrypted_file.read()
+            data = remove_padding(decryptor.decrypt(encrypted_data))
         backup_file_name = backup_file(file_name, extension)
         if not os.path.exists(backup_file_name):
             shutil.copy2(file_name, backup_file_name)
-        with open(file_name, 'wb') as file:
-            file.write(data)
+        with open(file_name, 'wb') as new_file:
+            new_file.write(data)
         
         
 
